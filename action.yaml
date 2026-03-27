@@ -1,37 +1,66 @@
 ---
 # SPDX-License-Identifier: Apache-2.0
-# SPDX-FileCopyrightText: 2025 The Linux Foundation
+# SPDX-FileCopyrightText: 2023 The Linux Foundation
 
-# actions-template
-name: "🛠️ Actions Template"
-description: "Description of action"
-# Any relevant notes/observations can go here
+name: "nexus-docker-login"
+description: "Run docker login for all registries in Nexus3 and DockerHub"
 
 inputs:
-  input:
-    description: "Description of input"
+  nexus3-registry:
+    description: "Organization's Nexus registry URL"
     required: true
-
-outputs:
-  output:
-    description: "Description of output"
-    value: ${{ steps.code.outputs.output }}
+  nexus3-user:
+    description: "Nexus3 organization username"
+    required: true
+  dockerhub-user:
+    description: "DockerHub organization username"
+    required: true
+  nexus3-password:
+    description: "Nexus3 organization user's password"
+    required: true
+  dockerhub-password:
+    description: "DockerHub organization user's password"
+    required: true
 
 runs:
   using: "composite"
   steps:
-    - name: "Friendly Name"
-      id: code
-      shell: bash
-      run: |
-        # Friendly Name
-        input="${{ inputs.input }}"
-        if [ -z "$input" ]; then
-          echo "Error: mandatory input was not set/configured ❌"
-          exit 1
-        fi
-
-        echo "output=$input" >> "$GITHUB_ENV"
-        echo "output=$input" >> "$GITHUB_OUTPUT"
-        echo "Action received: $input ✅"
-        echo "Action received: $input ✅" >> "$GITHUB_STEP_SUMMARY"
+    - id: nexus3-10001-login
+      # yamllint disable-line rule:line-length
+      uses: docker/login-action@b45d80f862d83dbcd57f89517bcf500b2ab88fb2  # v4.0.0
+      with:
+        # yamllint disable-line rule:line-length
+        registry: "${{ inputs.nexus3-registry }}:10001"
+        username: docker
+        password: docker
+    - id: nexus3-10002-login
+      # yamllint disable-line rule:line-length
+      uses: docker/login-action@b45d80f862d83dbcd57f89517bcf500b2ab88fb2  # v4.0.0
+      with:
+        # yamllint disable-line rule:line-length
+        registry: "${{ inputs.nexus3-registry }}:10002"
+        username: ${{ inputs.nexus3-user }}
+        password: ${{ inputs.nexus3-password }}
+    - id: nexus3-10003-login
+      # yamllint disable-line rule:line-length
+      uses: docker/login-action@b45d80f862d83dbcd57f89517bcf500b2ab88fb2  # v4.0.0
+      with:
+        # yamllint disable-line rule:line-length
+        registry: "${{ inputs.nexus3-registry }}:10003"
+        username: ${{ inputs.nexus3-user }}
+        password: ${{ inputs.nexus3-password }}
+    - id: nexus3-10004-login
+      # yamllint disable-line rule:line-length
+      uses: docker/login-action@b45d80f862d83dbcd57f89517bcf500b2ab88fb2  # v4.0.0
+      with:
+        # yamllint disable-line rule:line-length
+        registry: "${{ inputs.nexus3-registry }}:10004"
+        username: ${{ inputs.nexus3-user }}
+        password: ${{ inputs.nexus3-password }}
+    - id: dockerhub-registry-login
+      # yamllint disable-line rule:line-length
+      uses: docker/login-action@b45d80f862d83dbcd57f89517bcf500b2ab88fb2  # v4.0.0
+      with:
+        registry: docker.io
+        username: ${{ inputs.dockerhub-user }}
+        password: ${{ inputs.dockerhub-password }}
